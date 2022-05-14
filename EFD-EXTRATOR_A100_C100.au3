@@ -7,7 +7,7 @@
 
 	Created: 26/04/2022
 
-	Edited: 26/04/2022
+	Edited: 10/05/2022
 
 	Description:
 	Extrai as linhas A100 e C100 para exportar num arquivo CSV para comparação com planilhas no Excel.
@@ -18,12 +18,12 @@
 #Region ### WRAPPER DIRECTIVES ###
 
 #AutoIt3Wrapper_Icon=IMG\ICONE.ico
-#AutoIt3Wrapper_Res_Fileversion=0.1.0
-#AutoIt3Wrapper_Res_Productversion=0.1.0
+#AutoIt3Wrapper_Res_Fileversion=0.1.1
+#AutoIt3Wrapper_Res_Productversion=0.1.1
 #AutoIt3Wrapper_Res_Field=ProductName|EFD-EXTRATOR_A100_C100
 #AutoIt3Wrapper_Res_LegalCopyright=GPL3 - Author: Luiz Fernando Cavalcanti
 #AutoIt3Wrapper_Res_Language=1046
-#AutoIt3Wrapper_Res_Description=Extrai as linhas A100 e C100 de um arquivo TXT do EFD Contribuicoes e grava em um CSV
+#AutoIt3Wrapper_Res_Description=Busca linhas duplicadas do Bloco A e C do arquivo do EFD e gera novo arquivo tratado
 
 #AutoIt3Wrapper_Outfile=.\EFD-EXTRATOR_A100_C100.exe
 
@@ -300,7 +300,7 @@ Func GravaArquivo()
 	Local $sDataDoc = ""
 	Local $sDataMov = ""
 
-	Local $sCabecalhoCSV = "BLOCO;NUM_DOC;DATA_DOC;DATA_MOV_SERV;VALOR_TOTAL;VALOR_PIS;VALOR_COFINS"
+	Local $sCabecalhoCSV = "BLOCO;OPERACAO;NUM_DOC;DATA_DOC;DATA_MOV_SERV;VALOR_TOTAL;VALOR_PIS;VALOR_COFINS"
 
 	Local $oHandleArqOut
 
@@ -325,17 +325,15 @@ Func GravaArquivo()
 	;GRAVA LINHAS A100
 	For $nLoopLinha = 0 to $nTotBlocoA
 
-		If $g_aLinhasA[$nLoopLinha][2] = "0" Then
 
-			$sDataDoc = StringFormat("%02i/%02i/%04i", StringMid($g_aLinhasA[$nLoopLinha][10],1,2),StringMid($g_aLinhasA[$nLoopLinha][10],3,2),StringMid($g_aLinhasA[$nLoopLinha][10],5,4))
 
-			$sDataMov = StringFormat("%02i/%02i/%04i", StringMid($g_aLinhasA[$nLoopLinha][11],1,2),StringMid($g_aLinhasA[$nLoopLinha][11],3,2),StringMid($g_aLinhasA[$nLoopLinha][11],5,4))
+		$sDataDoc = StringFormat("%02i/%02i/%04i", StringMid($g_aLinhasA[$nLoopLinha][10],1,2),StringMid($g_aLinhasA[$nLoopLinha][10],3,2),StringMid($g_aLinhasA[$nLoopLinha][10],5,4))
 
-			$sLinha = "A100;" & $g_aLinhasA[$nLoopLinha][8] & ";" & $sDataDoc & ";" & $sDataMov & ";" & $g_aLinhasA[$nLoopLinha][12] & ";" & $g_aLinhasA[$nLoopLinha][16] & ";" & $g_aLinhasA[$nLoopLinha][18]
+		$sDataMov = StringFormat("%02i/%02i/%04i", StringMid($g_aLinhasA[$nLoopLinha][11],1,2),StringMid($g_aLinhasA[$nLoopLinha][11],3,2),StringMid($g_aLinhasA[$nLoopLinha][11],5,4))
 
-			FileWriteLine($oHandleArqOut,BinaryToString(StringToBinary($sLinha, $SF_UTF8), $SF_ANSI))
+		$sLinha = "A100;" & $g_aLinhasA[$nLoopLinha][2] & ";" & $g_aLinhasA[$nLoopLinha][8] & ";" & $sDataDoc & ";" & $sDataMov & ";" & $g_aLinhasA[$nLoopLinha][12] & ";" & $g_aLinhasA[$nLoopLinha][16] & ";" & $g_aLinhasA[$nLoopLinha][18]
 
-		EndIf
+		FileWriteLine($oHandleArqOut,BinaryToString(StringToBinary($sLinha, $SF_UTF8), $SF_ANSI))
 
 	Next
 
@@ -344,17 +342,13 @@ Func GravaArquivo()
 	;GRAVA LINHAS C100
 	For $nLoopLinha = 0 to $nTotBlocoC
 
-		If $g_aLinhasC[$nLoopLinha][2] = "0" Then
+		$sDataDoc = StringFormat("%02i/%02i/%04i", StringMid($g_aLinhasC[$nLoopLinha][10],1,2),StringMid($g_aLinhasC[$nLoopLinha][10],3,2),StringMid($g_aLinhasC[$nLoopLinha][10],5,4))
 
-			$sDataDoc = StringFormat("%02i/%02i/%04i", StringMid($g_aLinhasC[$nLoopLinha][10],1,2),StringMid($g_aLinhasC[$nLoopLinha][10],3,2),StringMid($g_aLinhasC[$nLoopLinha][10],5,4))
+		$sDataMov = StringFormat("%02i/%02i/%04i", StringMid($g_aLinhasC[$nLoopLinha][11],1,2),StringMid($g_aLinhasC[$nLoopLinha][11],3,2),StringMid($g_aLinhasC[$nLoopLinha][11],5,4))
 
-			$sDataMov = StringFormat("%02i/%02i/%04i", StringMid($g_aLinhasC[$nLoopLinha][11],1,2),StringMid($g_aLinhasC[$nLoopLinha][11],3,2),StringMid($g_aLinhasC[$nLoopLinha][11],5,4))
+		$sLinha = "C100;" & $g_aLinhasA[$nLoopLinha][2] & ";" & $g_aLinhasC[$nLoopLinha][8] & ";" & $sDataDoc & ";" & $sDataMov & ";" & $g_aLinhasC[$nLoopLinha][12] & ";" & $g_aLinhasC[$nLoopLinha][26] & ";" & $g_aLinhasC[$nLoopLinha][27]
 
-			$sLinha = "C100;" &  $g_aLinhasC[$nLoopLinha][8] & ";" & $sDataDoc & ";" & $sDataMov & ";" & $g_aLinhasC[$nLoopLinha][12] & ";" & $g_aLinhasC[$nLoopLinha][26] & ";" & $g_aLinhasC[$nLoopLinha][27]
-
-			FileWriteLine($oHandleArqOut,BinaryToString(StringToBinary($sLinha, $SF_UTF8), $SF_ANSI))
-
-		EndIf
+		FileWriteLine($oHandleArqOut,BinaryToString(StringToBinary($sLinha, $SF_UTF8), $SF_ANSI))
 
 	Next
 
